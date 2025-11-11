@@ -13,8 +13,9 @@
         <input type="text" placeholder="PESQUISAR PELO  TÍTULO OU CÓDIGO" />
       </div>
       <div class="btn-content">
-        <button>Atualizar Notícias</button>
+        <button @click="atualizarNoticias">Atualizar Notícias</button>
       </div>
+
       <div class="table-of-news">
         <div class="container-titles">
           <div class="op code"><p>Código</p></div>
@@ -23,59 +24,88 @@
           <div class="op action"><p>Ação</p></div>
         </div>
         <div class="grid">
-          <spam v-for="noticia in noticias" :key="noticia.id" class="bars">
-            <spam class="container-code">
+          <div v-for="noticia in noticias" :key="noticia.id" class="bars">
+            <div class="container-code">
               <p>{{ noticia.id }}</p>
-            </spam>
-            <spam class="container-ttl">
-              <p>{{ noticia.titulo }}</p>
-            </spam>
-            <spam class="container-date">
-              <p>{{ noticia.data }}</p>
-            </spam>
-            <spam class="container-button">
+            </div>
+            <div class="container-ttl">
+              <p>{{ noticia.title }}</p>
+            </div>
+            <div class="container-date">
+              <p>{{ formatarData(noticia.published) }}</p>
+            </div>
+            <div class="container-button">
               <a :href="noticia.link" target="_blank">
                 <button>Ir para notícia</button>
               </a>
-            </spam>
-          </spam>
+            </div>
+          </div>
         </div>
       </div>
+      <p v-if="mensagemStatus" class="status-msg n">{{ mensagemStatus }}</p>
+      <div v-if="noticias.length === 0" class="sem-noticias n">Nenhuma notícia encontrada.</div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   name: 'PaginaPrincipal',
   data() {
     return {
-      noticias: [
-        {
-          id: '001',
-          titulo: 'Notícia Exemplo 1',
-          data: '2024-06-01',
-          link: 'https://example.com/noticia1',
-        },
-        {
-          id: '002',
-          titulo: 'Notícia Exemplo 2',
-          data: '2024-06-02',
-          link: 'https://example.com/noticia2',
-        },
-        {
-          id: '003',
-          titulo: 'Notícia Exemplo 3',
-          data: '2024-06-03',
-          link: 'https://example.com/noticia3',
-        },
-      ],
+      noticias: [],
+      mensagemStatus: '',
     }
+  },
+  methods: {
+    async carregarNoticias() {
+      try {
+        const response = await axios.get('http://localhost:8000/noticias')
+        this.noticias = response.data
+        console.log('✅ Notícias carregadas:', this.noticias)
+      } catch (error) {
+        console.error('❌ Erro ao carregar notícias:', error)
+      }
+    },
+
+    async atualizarNoticias() {
+      try {
+        const response = await axios.get('http://localhost:8000/atualizar')
+        this.mensagemStatus = response.data.message
+        // Atualiza a lista após atualizar
+        await this.carregarNoticias()
+      } catch (error) {
+        console.error('❌ Erro ao atualizar notícias:', error)
+        this.mensagemStatus = 'Erro ao atualizar notícias.'
+      }
+    },
+
+    formatarData(dataString) {
+      // Converte a string para objeto Date
+      const data = new Date(dataString)
+      // Retorna no formato DD/MM/YYYY HH:MM
+      return data.toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    },
+  },
+  mounted() {
+    this.carregarNoticias()
   },
 }
 </script>
 
 <style scoped>
+.n {
+  width: 100%;
+  text-align: center;
+}
 header {
   width: 100%;
   height: 15vh;
