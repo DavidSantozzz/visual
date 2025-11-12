@@ -7,7 +7,7 @@
     </header>
 
     <div class="container">
-      <!-- 🔍 Barra de busca -->
+      <!-- Barra de busca -->
       <div class="search-space">
         <div class="search-icon-space">
           <i class="fa-solid fa-magnifying-glass"></i>
@@ -20,12 +20,12 @@
         />
       </div>
 
-      <!-- 🔁 Botão de atualização -->
+      <!-- Botão de atualização -->
       <div class="btn-content">
         <button @click="atualizarNoticias">Atualizar Notícias</button>
       </div>
 
-      <!-- 📰 Tabela de notícias -->
+      <!-- Tabela de notícias -->
       <div class="table-of-news">
         <div class="container-titles">
           <div class="op code"><p>Código</p></div>
@@ -54,7 +54,6 @@
         </div>
       </div>
 
-      <!-- 📢 Mensagem de status -->
       <p v-if="mensagemStatus" class="status-msg n">{{ mensagemStatus }}</p>
     </div>
   </div>
@@ -74,7 +73,7 @@ export default {
   },
 
   computed: {
-    // 🧠 Filtra as notícias conforme o termo de busca
+    // Filtra as notícias conforme o termo de busca
     noticiasFiltradas() {
       if (!this.termoBusca) return this.noticias
 
