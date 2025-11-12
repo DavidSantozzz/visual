@@ -25,8 +25,14 @@
         <button @click="atualizarNoticias">Atualizar Notícias</button>
       </div>
 
+      <!-- Loader (exibido enquanto atualiza notícias) -->
+      <div v-if="carregando" class="loader-overlay">
+        <div class="loader"></div>
+        <p>Atualizando notícias...</p>
+      </div>
+
       <!-- Tabela de notícias -->
-      <div class="table-of-news">
+      <div class="table-of-news" v-if="!carregando">
         <div class="container-titles">
           <div class="op code"><p>Código</p></div>
           <div class="op title"><p>Título</p></div>
@@ -67,13 +73,13 @@ export default {
   data() {
     return {
       noticias: [],
-      termoBusca: '', // campo de pesquisa
+      termoBusca: '',
       mensagemStatus: '',
+      carregando: false, // 👈 controla o loader
     }
   },
 
   computed: {
-    // Filtra as notícias conforme o termo de busca
     noticiasFiltradas() {
       if (!this.termoBusca) return this.noticias
 
@@ -87,7 +93,6 @@ export default {
   },
 
   methods: {
-    // Remove acentos e caracteres especiais para melhorar a busca
     normalizar(texto) {
       return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     },
@@ -103,17 +108,17 @@ export default {
     },
 
     async atualizarNoticias() {
+      this.carregando = true // 🔥 mostra loader
       try {
         const response = await axios.get('http://localhost:8000/atualizar')
         this.mensagemStatus = response.data.message
 
         await this.carregarNoticias()
-
-        // ⏳ Remove mensagem após 2 segundos
-        setTimeout(() => (this.mensagemStatus = ''), 2000)
       } catch (error) {
         console.error('❌ Erro ao atualizar notícias:', error)
         this.mensagemStatus = 'Erro ao atualizar notícias.'
+      } finally {
+        this.carregando = false // ✅ esconde loader
         setTimeout(() => (this.mensagemStatus = ''), 2000)
       }
     },
@@ -135,15 +140,53 @@ export default {
 </script>
 
 <style scoped>
+/* Loader Overlay */
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 6px solid #e0e0e0;
+  border-top: 6px solid #007bff;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loader-overlay p {
+  font-weight: 600;
+  color: #333;
+}
 .n {
   width: 100%;
   height: 100vh;
-  background-color: #000000a9;
+  background-color: #ffffffd5;
   position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #fff;
+  color: #000;
   top: 0%;
   left: 0%;
   font-weight: 600;
