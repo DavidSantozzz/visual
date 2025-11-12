@@ -5,17 +5,27 @@
         <img src="../assets/images/LOGO.png" alt="" />
       </div>
     </header>
+
     <div class="container">
+      <!-- 🔍 Barra de busca -->
       <div class="search-space">
         <div class="search-icon-space">
           <i class="fa-solid fa-magnifying-glass"></i>
         </div>
-        <input type="text" placeholder="PESQUISAR PELO  TÍTULO OU CÓDIGO" />
+        <input
+          type="text"
+          v-model="termoBusca"
+          placeholder="PESQUISAR PELO TÍTULO OU CÓDIGO"
+          class="input-pesquisa"
+        />
       </div>
+
+      <!-- 🔁 Botão de atualização -->
       <div class="btn-content">
         <button @click="atualizarNoticias">Atualizar Notícias</button>
       </div>
 
+      <!-- 📰 Tabela de notícias -->
       <div class="table-of-news">
         <div class="container-titles">
           <div class="op code"><p>Código</p></div>
@@ -23,8 +33,9 @@
           <div class="op date"><p>Data</p></div>
           <div class="op action"><p>Ação</p></div>
         </div>
+
         <div class="grid">
-          <div v-for="noticia in noticias" :key="noticia.id" class="bars">
+          <div v-for="noticia in noticiasFiltradas" :key="noticia.id" class="bars">
             <div class="container-code">
               <p>{{ noticia.id }}</p>
             </div>
@@ -42,8 +53,9 @@
           </div>
         </div>
       </div>
+
+      <!-- 📢 Mensagem de status -->
       <p v-if="mensagemStatus" class="status-msg n">{{ mensagemStatus }}</p>
-      <div v-if="noticias.length === 0" class="sem-noticias n">Nenhuma notícia encontrada.</div>
     </div>
   </div>
 </template>
@@ -56,10 +68,31 @@ export default {
   data() {
     return {
       noticias: [],
+      termoBusca: '', // campo de pesquisa
       mensagemStatus: '',
     }
   },
+
+  computed: {
+    // 🧠 Filtra as notícias conforme o termo de busca
+    noticiasFiltradas() {
+      if (!this.termoBusca) return this.noticias
+
+      const termo = this.normalizar(this.termoBusca.toLowerCase())
+
+      return this.noticias.filter((n) => {
+        const titulo = this.normalizar(n.title.toLowerCase())
+        return titulo.includes(termo) || n.id.toString().includes(termo)
+      })
+    },
+  },
+
   methods: {
+    // Remove acentos e caracteres especiais para melhorar a busca
+    normalizar(texto) {
+      return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    },
+
     async carregarNoticias() {
       try {
         const response = await axios.get('http://localhost:8000/noticias')
@@ -74,27 +107,28 @@ export default {
       try {
         const response = await axios.get('http://localhost:8000/atualizar')
         this.mensagemStatus = response.data.message
-        // Atualiza a lista após atualizar
+
         await this.carregarNoticias()
+
+        // ⏳ Remove mensagem após 2 segundos
+        setTimeout(() => (this.mensagemStatus = ''), 2000)
       } catch (error) {
         console.error('❌ Erro ao atualizar notícias:', error)
         this.mensagemStatus = 'Erro ao atualizar notícias.'
+        setTimeout(() => (this.mensagemStatus = ''), 2000)
       }
     },
 
     formatarData(dataString) {
-      // Converte a string para objeto Date
       const data = new Date(dataString)
-      // Retorna no formato DD/MM/YYYY HH:MM
-      return data.toLocaleString('pt-BR', {
+      return data.toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
       })
     },
   },
+
   mounted() {
     this.carregarNoticias()
   },
@@ -104,6 +138,17 @@ export default {
 <style scoped>
 .n {
   width: 100%;
+  height: 100vh;
+  background-color: #000000a9;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  top: 0%;
+  left: 0%;
+  font-weight: 600;
+  font-size: 50px;
   text-align: center;
 }
 header {
