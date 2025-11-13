@@ -134,6 +134,14 @@ export default {
 
   mounted() {
     this.carregarNoticias()
+
+    setInterval(
+      () => {
+        this.atualizarNoticias()
+        console.log('Botão "Atualizar Notícias" acionado automaticamente.')
+      },
+      60 * 60 * 1000,
+    )
   },
 }
 </script>
