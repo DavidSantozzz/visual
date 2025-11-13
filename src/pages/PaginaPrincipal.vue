@@ -1,11 +1,6 @@
 <template>
   <div>
-    <header>
-      <div class="header-space">
-        <img src="../assets/images/LOGO.png" alt="" />
-      </div>
-    </header>
-
+    <Header />
     <div class="container">
       <!-- Barra de busca -->
       <div class="search-space">
@@ -52,9 +47,9 @@
               <p>{{ formatarData(noticia.published) }}</p>
             </div>
             <div class="container-button">
-              <a :href="noticia.link" target="_blank">
+              <router-link :to="{ name: 'Noticia', params: { id: noticia.id } }">
                 <button>Ir para notícia</button>
-              </a>
+              </router-link>
             </div>
           </div>
         </div>
@@ -67,15 +62,19 @@
 
 <script>
 import axios from 'axios'
+import Header from '@/components/Header.vue'
 
 export default {
   name: 'PaginaPrincipal',
+  components: {
+    Header,
+  },
   data() {
     return {
       noticias: [],
       termoBusca: '',
       mensagemStatus: '',
-      carregando: false, // 👈 controla o loader
+      carregando: false,
     }
   },
 
@@ -108,7 +107,7 @@ export default {
     },
 
     async atualizarNoticias() {
-      this.carregando = true // 🔥 mostra loader
+      this.carregando = true
       try {
         const response = await axios.get('http://localhost:8000/atualizar')
         this.mensagemStatus = response.data.message
@@ -118,7 +117,7 @@ export default {
         console.error('❌ Erro ao atualizar notícias:', error)
         this.mensagemStatus = 'Erro ao atualizar notícias.'
       } finally {
-        this.carregando = false // ✅ esconde loader
+        this.carregando = false
         setTimeout(() => (this.mensagemStatus = ''), 2000)
       }
     },
@@ -192,24 +191,6 @@ export default {
   font-weight: 600;
   font-size: 50px;
   text-align: center;
-}
-header {
-  width: 100%;
-  height: 15vh;
-  display: flex;
-  justify-content: center;
-  border-bottom: 5px solid;
-  border-image: linear-gradient(to right, #508bcf, #2360a7) 1;
-}
-.header-space {
-  width: 90%;
-  height: 100%;
-  display: flex;
-  justify-content: start;
-  align-items: center;
-}
-header img {
-  width: 300px;
 }
 .container {
   width: 90%;
